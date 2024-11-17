@@ -24,7 +24,7 @@ app.use(
 connectPostgres();
 
 app.get('/', (req: Request, res: Response) => {
-  res.status(200).send('Welcome!');
+  res.status(200).send(`Server is working...`);
 });
 
 app.use('/api/auth', authRoute);
