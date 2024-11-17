@@ -25,6 +25,7 @@ export const sendMail = async (email: string, verificationCode: string) => {
       <p style="font-size: 16px; color: #555; text-align: center;">
         Your verification code:
       </p>
+      
       <div style="text-align: center; margin: 20px 0;">
         <span style="display: inline-block; font-size: 24px; font-weight: bold; color: #e0f7fa; background-color: #dba765; padding: 10px 20px; border-radius: 5px;">
           ${verificationCode}
