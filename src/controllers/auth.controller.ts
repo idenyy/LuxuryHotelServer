@@ -6,27 +6,50 @@ import { sendMail } from '../utils/mail.js';
 import User from '../models/user.model.js';
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
-  const { fullName, email, verification_code, password } = req.body;
+  const { fullName, email, password } = req.body;
 
   try {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Invalid Email Format' });
-    }
+    if (!emailRegex.test(email)) return res.status(400).json({ error: 'Invalid Email Format' });
 
     const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) return res.status(400).json({ error: 'User Already Exists' });
 
-    if (existingUser) {
-      return res.status(400).json({ error: 'User Already Exists' });
+    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    req.session.signupData = {
+      fullName,
+      email,
+      password,
+      verificationCode,
+      verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
+    };
+
+    await sendMail(email, verificationCode);
+
+    return res.status(200).json({ message: 'Verification code sent. Please check your email' });
+  } catch (error: any) {
+    console.error(`Error in [initiateSignup]: ${error.message}`);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const signupComplete = async (req: Request, res: Response): Promise<any> => {
+  const { verification_code } = req.body;
+
+  try {
+    const signupData = req.session.signupData;
+
+    if (!signupData) {
+      return res.status(404).json({ error: 'Data not found. Please start again' });
     }
 
-    if (!req.session.verificationCode || verification_code !== req.session.verificationCode || req.session.verificationCodeUsed) {
-      return res.status(400).json({ error: 'Invalid Verification Code' });
-    }
+    const { fullName, email, password, verificationCode, verificationCodeExpiry } = signupData;
 
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
+    if (!verificationCode || verification_code !== verificationCode || Date.now() > verificationCodeExpiry)
+      return res.status(400).json({ error: 'Invalid or expired verification code' });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -34,12 +57,14 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const user = await User.create({
       fullName,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      isVerified: true,
     });
 
     if (user) {
+      req.session.signupData = null;
+
       const token = generateToken(user.id);
-      req.session.verificationCodeUsed = true;
 
       const userResponse = user.toJSON();
       delete userResponse.password;
@@ -47,25 +72,8 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       return res.status(201).json({ token, user: userResponse });
     }
   } catch (error: any) {
-    console.error(`Error in [signup] controller: ${error.message}`);
+    console.error(`Error in [completeSignup]: ${error.message}`);
     return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-export const sendVerificationCode = async (req: Request, res: Response): Promise<any> => {
-  const { email } = req.body;
-
-  try {
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-    req.session.verificationCode = verificationCode;
-
-    await sendMail(email, verificationCode);
-
-    return res.status(200).json({ message: 'Verification Code Sent' });
-  } catch (error: any) {
-    console.error(`Error in [sendVerificationCode] controller: ${error.message}`);
-    return res.status(500).json({ error: 'Failed to send verification code' });
   }
 };
 
@@ -95,7 +103,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         id: user.id,
         fullName: user.fullName,
         email: user.email,
-        role: user.role
+        role: user.role,
       });
     }
 

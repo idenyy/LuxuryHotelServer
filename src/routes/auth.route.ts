@@ -1,5 +1,5 @@
 import express from 'express';
-import { authCheck, login, logout, sendVerificationCode, signup } from '../controllers/auth.controller.js';
+import { authCheck, login, logout, signup, signupComplete } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middleware/authorization.js';
 
 const router = express.Router();
@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/check', verifyToken, authCheck);
 
 router.post('/signup', signup);
-router.post('/signup/verify', sendVerificationCode);
+router.post('/signup/complete', signupComplete);
 
 router.post('/login', login);
 
