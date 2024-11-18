@@ -21,11 +21,10 @@ app.use(
     cookie: { secure: false }
   })
 );
-app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
+      "http://localhost:3000/",
       "https://luxury-hotel-60c7b53289ed.herokuapp.com/",
       "https://luxury-hotel-react.vercel.app/",
     ],
