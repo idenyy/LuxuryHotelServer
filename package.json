@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "npx tsc && node dist/server.js",
+    "start": "node dist/server.js",
     "dev": "nodemon dist/server.js",
     "watch": "tsc --watch",
     "build": "tsc"
