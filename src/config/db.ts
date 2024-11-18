@@ -9,7 +9,13 @@ export const sequelize = new Sequelize({
   host: process.env.PG_HOST || 'localhost',
   database: process.env.PG_DATABASE || 'hotelserver',
   password: process.env.PG_PASSWORD || 'root',
-  port: Number(process.env.PG_PORT) || 5432
+  port: Number(process.env.PG_PORT) || 5432,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
 });
 
 const connectPostgres = async (): Promise<void> => {
