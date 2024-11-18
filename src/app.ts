@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import session from 'express-session';
 import dotenv from 'dotenv';
+import cors from "cors";
 
 import connectPostgres from './config/db.js';
 import authRoute from './routes/auth.route.js';
@@ -19,6 +20,17 @@ app.use(
     saveUninitialized: true,
     cookie: { secure: false }
   })
+);
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://luxury-hotel-60c7b53289ed.herokuapp.com/",
+      "https://luxury-hotel-react.vercel.app/",
+    ],
+    credentials: true,
+  }),
 );
 
 connectPostgres();
