@@ -25,7 +25,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       password,
       verificationCode,
       verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
-    }), { httpOnly: true, maxAge: 10 * 60 * 1000 });
+    }), { httpOnly: true, sameSite: "none", maxAge: 10 * 60 * 1000 });
 
     await sendMail(email, verificationCode);
 
