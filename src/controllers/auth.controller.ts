@@ -1,5 +1,6 @@
-import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 import { generateToken } from '../utils/token.js';
 import { sendMail } from '../utils/mail.js';
@@ -19,13 +20,21 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    res.cookie('signupData', JSON.stringify({
+    const signupData = {
       fullName,
       email,
       password,
       verificationCode,
-      verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
-    }), { httpOnly: true, sameSite: "none", maxAge: 10 * 60 * 1000 });
+      verificationCodeExpiry: Date.now() + 10 * 60 * 1000, // 10 хвилин
+    };
+    const token = jwt.sign(signupData, process.env.JWT_AUTH!, { expiresIn: '10m' });
+
+    res.cookie('signupData', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 10 * 60 * 1000,
+    });
 
     await sendMail(email, verificationCode);
 
@@ -42,18 +51,16 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
   const { verification_code } = req.body;
 
   try {
-    const signupData = req.cookies.signupData ? JSON.parse(req.cookies.signupData) : null;
-    console.log("Cookie: ", req.cookies)
-    console.log("SignupData: ", req.cookies.signupData);
-    if (!signupData) {
-      return res.status(404).json({ error: 'Data not found. Please start again' });
-    }
+    const token = req.cookies.signupData;
+    if (!token) return res.status(404).json({ error: 'Data not found' });
+
+    let signupData: any = jwt.verify(token, process.env.JWT_AUTH!);
+    if (!signupData) return res.status(400).json({ error: 'Invalid or expired token. Please start again.' });
 
     const { fullName, email, password, verificationCode, verificationCodeExpiry } = signupData;
 
-    if (!verificationCode || verification_code !== verificationCode || Date.now() > verificationCodeExpiry) {
+    if (!verificationCode || verification_code !== verificationCode || Date.now() > verificationCodeExpiry)
       return res.status(400).json({ error: 'Invalid or expired verification code' });
-    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -62,7 +69,6 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
       fullName,
       email,
       password: hashedPassword,
-      isVerified: true,
     });
 
     if (user) {
@@ -75,7 +81,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
       return res.status(201).json({
         token,
         user: userResponse,
-        message: 'Registration successful',
+        message: 'Signup Successfully',
       });
     }
   } catch (error: any) {
@@ -88,15 +94,10 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
 
   try {
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
+    if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
 
     const user = await User.findOne({ where: { email } });
-
-    if (!user) {
-      return res.status(404).json({ error: 'User Not Found' });
-    }
+    if (!user) return res.status(404).json({ error: 'User Not Found' });
 
     const isUserPasswordCorrect = await bcrypt.compare(password, user.password);
 
@@ -123,11 +124,11 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
 export const logout = async (req: Request, res: Response): Promise<any> => {
   try {
-    res.cookie("jwt", "", { maxAge: 0 });
-    res.status(200).json({ message: "Logged out successfully" });
+    res.cookie('jwt', '', { maxAge: 0 });
+    res.status(200).json({ message: 'Logged out successfully' });
   } catch (error: any) {
     console.error(`Error in [logout] controller: ${error.message}`);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
