@@ -31,11 +31,6 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     return res.status(200).json({
       message: 'Verification code sent. Please check your email',
-      fullName,
-      email,
-      password,
-      verificationCode,
-      verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
     });
   } catch (error: any) {
     console.error(`Error in [signup]: ${error.message}`);
@@ -48,6 +43,8 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
 
   try {
     const signupData = req.cookies.signupData ? JSON.parse(req.cookies.signupData) : null;
+    console.log("Cookie: ", req.cookies)
+    console.log("SignupData: ", req.cookies.signupData);
     if (!signupData) {
       return res.status(404).json({ error: 'Data not found. Please start again' });
     }
