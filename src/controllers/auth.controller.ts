@@ -19,18 +19,26 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await sendMail(email, verificationCode);
-
-    return res.status(200).json({
+    res.cookie('signupData', JSON.stringify({
       fullName,
       email,
       password,
       verificationCode,
       verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
+    }), { httpOnly: true, maxAge: 10 * 60 * 1000 });
+
+    await sendMail(email, verificationCode);
+
+    return res.status(200).json({
       message: 'Verification code sent. Please check your email',
+      fullName,
+      email,
+      password,
+      verificationCode,
+      verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
     });
   } catch (error: any) {
-    console.error(`Error in [initiateSignup]: ${error.message}`);
+    console.error(`Error in [signup]: ${error.message}`);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -39,15 +47,16 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
   const { verification_code } = req.body;
 
   try {
-    const signupData = JSON.parse(localStorage.getItem('signupData') || '{}');
+    const signupData = req.cookies.signupData ? JSON.parse(req.cookies.signupData) : null;
     if (!signupData) {
       return res.status(404).json({ error: 'Data not found. Please start again' });
     }
 
     const { fullName, email, password, verificationCode, verificationCodeExpiry } = signupData;
 
-    if (!verificationCode || verification_code !== verificationCode || Date.now() > verificationCodeExpiry)
+    if (!verificationCode || verification_code !== verificationCode || Date.now() > verificationCodeExpiry) {
       return res.status(400).json({ error: 'Invalid or expired verification code' });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -60,19 +69,23 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     });
 
     if (user) {
-      const token = generateToken(user.id, res);
+      res.clearCookie('signupData');
 
+      const token = generateToken(user.id);
       const userResponse = user.toJSON();
       delete userResponse.password;
 
-      return res.status(201).json({ token, user: userResponse });
+      return res.status(201).json({
+        token,
+        user: userResponse,
+        message: 'Registration successful',
+      });
     }
   } catch (error: any) {
-    console.error(`Error in [completeSignup]: ${error.message}`);
+    console.error(`Error in [signupComplete]: ${error.message}`);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
