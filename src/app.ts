@@ -1,6 +1,5 @@
 import express, { Application, Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from "cors";
@@ -14,16 +13,8 @@ export const app: Application = express();
 
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET || '',
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: { secure: false }
-//   })
-// );
+
 app.use(
   cors({
     origin: [

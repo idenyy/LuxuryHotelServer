@@ -19,17 +19,16 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    res.cookie('signupData', JSON.stringify({
+    await sendMail(email, verificationCode);
+
+    return res.status(200).json({
       fullName,
       email,
       password,
       verificationCode,
       verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
-    }), { httpOnly: true, maxAge: 10 * 60 * 1000 });
-
-    await sendMail(email, verificationCode);
-
-    return res.status(200).json({ message: 'Verification code sent. Please check your email' });
+      message: 'Verification code sent. Please check your email',
+    });
   } catch (error: any) {
     console.error(`Error in [initiateSignup]: ${error.message}`);
     return res.status(500).json({ error: 'Internal Server Error' });
@@ -37,11 +36,9 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 };
 
 export const signupComplete = async (req: Request, res: Response): Promise<any> => {
-  const { verification_code } = req.body;
+  const { verification_code, signupData } = req.body;
 
   try {
-    const signupData = req.cookies.signupData ? JSON.parse(req.cookies.signupData) : null;
-    console.log(signupData, req.cookies)
     if (!signupData) {
       return res.status(404).json({ error: 'Data not found. Please start again' });
     }
@@ -62,9 +59,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     });
 
     if (user) {
-      res.clearCookie('signupData');
-
-      const token = generateToken(user.id);
+      const token = generateToken(user.id, res);
 
       const userResponse = user.toJSON();
       delete userResponse.password;
@@ -95,7 +90,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     const isUserPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (user && isUserPasswordCorrect) {
-      const token = generateToken(user.id);
+      const token = generateToken(user.id, res);
 
       console.log(Promise);
 
@@ -117,18 +112,11 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
 export const logout = async (req: Request, res: Response): Promise<any> => {
   try {
-    req.session.destroy((error) => {
-      if (error) {
-        console.error(`Error in [logout] controller: ${error.message}`);
-        return res.status(500).json({ error: 'Failed to log out' });
-      }
-
-      res.clearCookie('connect.sid');
-      return res.status(200).json({ message: 'Logged Out Successfully' });
-    });
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" });
   } catch (error: any) {
     console.error(`Error in [logout] controller: ${error.message}`);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -138,7 +126,7 @@ export const authCheck = async (req: Request, res: Response): Promise<any> => {
     const user = await User.findOne({ where: { id: req.user.id }, attributes: { exclude: ['password'] } });
     if (!user) return res.status(404).json({ error: 'User Not Found' });
 
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, res);
 
     return res.status(200).json({ token, user });
   } catch (error: any) {
