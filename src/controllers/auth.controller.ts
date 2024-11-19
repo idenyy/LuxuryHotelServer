@@ -39,6 +39,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
   const { verification_code, signupData } = req.body;
 
   try {
+    const signupData = JSON.parse(localStorage.getItem('signupData') || '{}');
     if (!signupData) {
       return res.status(404).json({ error: 'Data not found. Please start again' });
     }
