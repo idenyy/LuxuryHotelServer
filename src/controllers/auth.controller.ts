@@ -71,7 +71,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     if (user) {
       res.clearCookie('signupData');
 
-      const token = generateToken(user.id);
+      const token = generateToken(user.id, res);
       const userResponse = user.toJSON();
       delete userResponse.password;
 
