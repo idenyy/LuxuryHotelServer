@@ -1,5 +1,5 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../config/db.js';
 
 class User extends Model {
   declare id: number;
@@ -7,7 +7,6 @@ class User extends Model {
   declare email: string;
   declare password: string;
   declare role?: string;
-  declare isVerified?: boolean;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -38,22 +37,18 @@ User.init(
     role: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "user",
+      defaultValue: 'user',
       validate: {
-        isIn: [["user", "admin"]],
+        isIn: [['user', 'admin']],
       },
-    },
-    isVerified: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
     },
   },
   {
     sequelize,
-    modelName: "User",
-    tableName: "users",
+    modelName: 'User',
+    tableName: 'users',
     timestamps: true,
-  },
+  }
 );
 
 export default User;
