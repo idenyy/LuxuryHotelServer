@@ -36,7 +36,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 };
 
 export const signupComplete = async (req: Request, res: Response): Promise<any> => {
-  const { verification_code, signupData } = req.body;
+  const { verification_code } = req.body;
 
   try {
     const signupData = JSON.parse(localStorage.getItem('signupData') || '{}');
