@@ -19,13 +19,13 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    req.session.signupData = {
+    res.cookie('signupData', JSON.stringify({
       fullName,
       email,
       password,
       verificationCode,
       verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
-    };
+    }), { httpOnly: true, maxAge: 10 * 60 * 1000 });
 
     await sendMail(email, verificationCode);
 
@@ -40,8 +40,8 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
   const { verification_code } = req.body;
 
   try {
-    const signupData = req.session.signupData;
-
+    const signupData = req.cookies.signupData ? JSON.parse(req.cookies.signupData) : null;
+    console.log(signupData, req.cookies)
     if (!signupData) {
       return res.status(404).json({ error: 'Data not found. Please start again' });
     }
@@ -62,7 +62,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     });
 
     if (user) {
-      req.session.signupData = null;
+      res.clearCookie('signupData');
 
       const token = generateToken(user.id);
 
@@ -76,6 +76,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
