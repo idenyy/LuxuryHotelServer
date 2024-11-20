@@ -7,7 +7,7 @@ import { sendMail } from '../utils/mail.js';
 import User from '../models/user.model.js';
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
-  const { fullName, email, password } = req.body;
+  const { name, email, password } = req.body;
 
   try {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -21,7 +21,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     const signupData = {
-      fullName,
+      name,
       email,
       password,
       verificationCode,
@@ -57,7 +57,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     let signupData: any = jwt.verify(token, process.env.JWT_AUTH!);
     if (!signupData) return res.status(400).json({ error: 'Invalid or expired token. Please start again.' });
 
-    const { fullName, email, password, verificationCode, verificationCodeExpiry } = signupData;
+    const { name, email, password, verificationCode, verificationCodeExpiry } = signupData;
 
     if (!verificationCode || verification_code !== verificationCode || Date.now() > verificationCodeExpiry)
       return res.status(400).json({ error: 'Invalid or expired verification code' });
@@ -66,7 +66,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await User.create({
-      fullName,
+      name,
       email,
       password: hashedPassword,
     });
@@ -108,7 +108,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         message: 'Login Successfully',
         token,
         id: user.id,
-        fullName: user.fullName,
+        name: user.name,
         email: user.email,
         role: user.role,
       });

@@ -5,7 +5,7 @@ declare module 'express-session' {
     verificationCode?: string;
     verificationCodeUsed?: boolean;
     signupData?: {
-      fullName: string;
+      name: string;
       email: string;
       password: string;
       verificationCode: string;
