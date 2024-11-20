@@ -104,9 +104,8 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     if (user && isUserPasswordCorrect) {
       const token = generateToken(user.id, res);
 
-      console.log(Promise);
-
       return res.status(200).json({
+        message: 'Login Successfully',
         token,
         id: user.id,
         fullName: user.fullName,
