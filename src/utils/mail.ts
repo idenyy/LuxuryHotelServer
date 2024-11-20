@@ -4,50 +4,108 @@ export const sendMail = async (email: string, verificationCode: string) => {
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      host: 'smtp.gmail.email',
+      host: 'smtp.gmail.com',
       port: 587,
       secure: false,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-      }
+        pass: process.env.EMAIL_PASSWORD,
+      },
     });
 
     const mailOptions = {
       from: {
         name: 'Luxury Hotel',
-        address: process.env.EMAIL_USER || ''
+        address: process.env.EMAIL_USER || '',
       },
       to: email,
       subject: 'Verification Code',
       html: `
-          <div style="font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
-            <h1 style="font-family: Times New Roman, sans-serif; color: #dba765; font-size: 18px; text-align: center;">LUXURY</h1>
-            <p style=" font-size: 20px; color: #555; text-align: center;">
-                Verification code
-            </p>
-
-            <div style="text-align: center; margin: 20px 0;">
-              <span style="display: inline-block; font-size: 26px; font-weight: bold; color: #e0f7fa; background-color: #dba765; padding: 10px 20px; border-radius: 5px;">
-                ${verificationCode}
-              </span>
-            </div>
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Verification Code</title>
+          <style>
+            * {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              margin: 0;
+              padding: 0;
+              color: #0a090b;
+              box-sizing: border-box;
+            }
+            .email-container {
+              max-width: 600px;
+              min-width: 400px;
+              margin: 20px auto;
+              padding: 30px;
+              background: #fff;
+              border: 1px solid #eee;
+            }
             
-            <p style="font-size: 14px; color: #777; text-align: center;">
-              This code is valid for 10 minutes. If you did not make this request, simply ignore this email.
-            </p>
-  
-            <hr style="border: none; border-top: 1px solid #e0e0e0;">
-  
-          <p style="font-size: 12px; color: #999; text-align: center;">
-            © ${new Date().getFullYear()} LUXURY HOTEL. All rights reserved.
-          </p>
-        </div>`
+            /* Header */
+            .email-header {
+              font-family: Georgia, 'Times New Roman', Times, serif;
+              font-size: 18px;
+              color: #dba765;
+              text-align: left;
+            }
+            
+            /* Body */
+            .email-body {
+              font-size: 16px;
+              line-height: 2;
+              
+              margin-top: 30px;
+            }
+            .email-code {
+              width: 100%;
+              font-size: 30px;
+              font-weight: 700;
+              letter-spacing: 0.2em;
+              background: #f1f1f1;
+              text-align: center;
+              border-radius: 10px;
+              padding: 20px 0;
+              margin: 25px 0;
+            }
+            .email-code__text{
+              font-size: 16px;
+              line-height: 22px;
+            }
+            
+            /* Footer */
+            .email-footer {
+              text-align: center;
+              font-size: 14px;
+              color: #666;
+              
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <h1 class="email-header">LUXURY</h1>
+            <div class="email-body">
+              <p>Hi there,</p>
+              <p>This is your one time verification code.</p>
+              <div class="email-code">${verificationCode}</div>
+              <p class="email-code__text">This code is only active for the next 10 minutes. Once the code expires you will have to resubmit a request for a code.</p>
+            </div>
+            <div class="email-footer">
+              &copy; ${new Date().getFullYear()} ${new Date().getFullYear()} LUXURY HOTEL. All rights reserved.
+            </div>
+          </div>
+        </body>
+      </html>
+      `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    console.error('Error sending Mail: ', error);
-    throw new Error('Failed to Send Mail.');
+    console.error('Error sending email:', error);
+    throw new Error('Failed to send email.');
   }
 };
