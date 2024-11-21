@@ -3,11 +3,13 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import cron from 'node-cron';
 
 import connectPostgres from './config/db.js';
 import authRoute from './routes/auth.route.js';
 import roomRoute from './routes/room.route.js';
 import bookingRoute from './routes/booking.route.js';
+import { updateRoomAvailability } from './controllers/booking.controller.js';
 
 dotenv.config();
 
@@ -33,5 +35,10 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRoute);
 app.use('/api/rooms', roomRoute);
 app.use('/api/booking', bookingRoute);
+
+cron.schedule('0 0 * * *', () => {
+  console.log('Running room availability update...');
+  updateRoomAvailability();
+});
 
 export default app;

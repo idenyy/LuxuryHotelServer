@@ -1,10 +1,9 @@
 import express from 'express';
-import { bookRoom, checkOut } from '../controllers/booking.controller.js';
+import { checkOut } from '../controllers/booking.controller.js';
 import { authorization } from '../middleware/authorization.js';
 
 const router = express.Router();
 
-router.post('/check', checkOut);
-router.post('/room', authorization, bookRoom);
+router.post('/check', authorization, checkOut);
 
 export default router;

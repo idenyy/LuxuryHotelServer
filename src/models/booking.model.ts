@@ -9,6 +9,7 @@ class Booking extends Model {
   declare roomId: number;
   declare price: number;
   declare extraServices?: string[];
+  declare status?: string;
   declare checkInDate: Date;
   declare checkOutDate: Date;
   declare readonly createdAt: Date;
@@ -50,6 +51,11 @@ Booking.init(
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
     },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 'active',
+    },
     checkInDate: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -72,4 +78,4 @@ Room.hasMany(Booking, { foreignKey: 'roomId', as: 'bookings' });
 Booking.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Booking.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
 
-export { User, Room, Booking };
+export default Booking;
