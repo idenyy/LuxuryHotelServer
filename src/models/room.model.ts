@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/db.js';
-import { Booking } from './booking.model';
+import Booking from './booking.model.js';
 
 class Room extends Model {
   declare id: number;
