@@ -3,9 +3,9 @@ import { Request, Response, NextFunction } from 'express';
 
 import User from '../models/user.model.js';
 
-export const authorizationToken = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+export const authorization = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
-    const token = (req.headers.authorization || '').replace(/Bearer\s?/, '');
+    const token = (req.headers.authorization || '').replace(/Bearer\s?/, '') || req.cookies.jwt;
     if (!token) return res.status(401).json({ error: 'Unauthorized: No token provided' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
