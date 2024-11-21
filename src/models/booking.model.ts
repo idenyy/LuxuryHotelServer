@@ -1,6 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/db.js';
-import User from './user.model.js';
 import Room from './room.model.js';
 
 class Booking extends Model {
@@ -26,12 +25,6 @@ Booking.init(
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: User,
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
     },
     roomId: {
       type: DataTypes.INTEGER,
@@ -73,9 +66,7 @@ Booking.init(
   }
 );
 
-User.hasMany(Booking, { foreignKey: 'userId', as: 'bookings' });
 Room.hasMany(Booking, { foreignKey: 'roomId', as: 'bookings' });
-Booking.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Booking.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
 
 export default Booking;
