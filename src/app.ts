@@ -35,7 +35,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
-app.use('/api/rooms', roomRoute);
+app.use('/api/room', roomRoute);
 app.use('/api/booking', bookingRoute);
 
 cron.schedule('0 0 * * *', () => {
