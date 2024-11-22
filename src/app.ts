@@ -10,6 +10,7 @@ import authRoute from './routes/auth.route.js';
 import roomRoute from './routes/room.route.js';
 import bookingRoute from './routes/booking.route.js';
 import { updateRoomAvailability } from './controllers/booking.controller.js';
+import userRoute from './routes/user.route.js';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/api/auth', authRoute);
+app.use('/api/user', userRoute);
 app.use('/api/rooms', roomRoute);
 app.use('/api/booking', bookingRoute);
 

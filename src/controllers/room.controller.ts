@@ -7,13 +7,16 @@ export const add = async (req: Request, res: Response): Promise<any> => {
   if (!number || !type || !price || !beds) return res.status(400).json({ message: 'Missing required fields' });
 
   try {
+    const room = await Room.findOne({ where: { number } });
+
+    if (room) return res.status(400).json({ error: 'Room already exists' });
+
     const newRoom = await Room.create({
       number,
       type,
       price,
       description,
       beds,
-      isAvailable: false,
     });
 
     return res.status(201).json(newRoom);
