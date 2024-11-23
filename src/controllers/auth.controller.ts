@@ -25,7 +25,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       email,
       password,
       verificationCode,
-      verificationCodeExpiry: Date.now() + 10 * 60 * 1000 // 10 хвилин
+      verificationCodeExpiry: Date.now() + 10 * 60 * 1000
     };
     const token = jwt.sign(signupData, process.env.JWT_AUTH!, { expiresIn: '10m' });
 
