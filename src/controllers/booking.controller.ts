@@ -233,7 +233,22 @@ export const updateRoomAvailability = async () => {
         console.log(`Room ${room.id} is now available.`);
       }
 
-      await booking.update({ status: 'completed' });
+      await booking.update({ status: 'completed!!!!!!!!!!!!!!!!' });
+    }
+
+    for (const booking of bookings) {
+      const room = await Room.findByPk(booking.roomId);
+
+      if (room) {
+        if (!room.isAvailable) {
+          await room.update({ isAvailable: true });
+          console.log(`Room ${room.id} is now available.`);
+        }
+
+        await booking.update({ status: 'completed' });
+      } else {
+        console.log(`Кімната з ID ${booking.roomId} не знайдена.`);
+      }
     }
   } catch (error) {
     console.error('Error updating room availability:', error);

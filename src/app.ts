@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com/', 'https://luxury-hotel-react.vercel.app/'],
-    credentials: true,
+    credentials: true
   })
 );
 
@@ -38,9 +38,9 @@ app.use('/api/user', userRoute);
 app.use('/api/room', roomRoute);
 app.use('/api/booking', bookingRoute);
 
-cron.schedule('0 0 * * *', () => {
+cron.schedule('*/5 * * * *', async () => {
   console.log('Running room availability update...');
-  updateRoomAvailability();
+  await updateRoomAvailability();
 });
 
 export default app;

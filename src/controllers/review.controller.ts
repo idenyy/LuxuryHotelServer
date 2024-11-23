@@ -63,31 +63,15 @@ export const getRoomReviews = async (req: Request, res: Response): Promise<any> 
       }
     });
 
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews : 0;
+
     return res.status(200).json({
-      reviews
+      reviews,
+      averageRating
     });
   } catch (error: any) {
     console.error(`Error in [getRoomReviews]: ${error.message}`);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-};
-
-export const getRoomRating = async (roomId: number) => {
-  const room = await Room.findOne({
-    where: { id: roomId },
-    include: {
-      model: Review,
-      as: 'reviews',
-      attributes: ['rating']
-    }
-  });
-
-  if (room) {
-    const totalReviews = room.Reviews?.length || 0;
-    const averageRating = totalReviews > 0 ? room.Reviews!.reduce((sum, review) => sum + review.rating, 0) / totalReviews : 0;
-
-    room.setDataValue('averageRating', averageRating);
-  }
-
-  return room;
 };
