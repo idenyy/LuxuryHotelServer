@@ -1,12 +1,11 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/db.js';
 import User from './user.model.js';
-import Room from './room.model.js';
 
 class Review extends Model {
   declare id: number;
   declare userId: number;
-  declare rootType: string;
+  declare roomType: string;
   declare rating: number;
   declare comment?: string;
   declare readonly createdAt: Date;
@@ -54,9 +53,8 @@ Review.init(
     timestamps: true
   }
 );
+
 User.hasMany(Review, { foreignKey: 'userId', as: 'reviews' });
-Room.hasMany(Review, { foreignKey: 'roomId', as: 'reviews' });
 Review.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Review.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
 
 export default Review;
