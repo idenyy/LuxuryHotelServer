@@ -73,11 +73,11 @@ Booking.init(
       defaultValue: 'active'
     },
     checkInDate: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false
     },
     checkOutDate: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: true
     }
   },
