@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
-import Room from '../models/room.model.js';
-import Booking from '../models/booking.model.js';
 import { Op } from 'sequelize';
 
-export const checkOut = async (req: Request, res: Response): Promise<any> => {
+import Room from '../models/room.model.js';
+import Booking from '../models/booking.model.js';
+import Table from '../models/table.model.js';
+
+export const checkOutRoom = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { checkInDate, checkOutDate, beds, extraServices } = req.body;
+  const { checkInDate, checkOutDate, beds, extraServices, type } = req.body;
 
   try {
     if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
@@ -18,7 +20,7 @@ export const checkOut = async (req: Request, res: Response): Promise<any> => {
     if (checkIn >= checkOut) return res.status(400).json({ error: 'Check-out date must be later than check-in date' });
 
     const room = await Room.findOne({
-      where: { beds: beds, isAvailable: true },
+      where: { type: type, beds, isAvailable: true },
       include: {
         model: Booking,
         as: 'bookings',
@@ -72,6 +74,115 @@ export const checkOut = async (req: Request, res: Response): Promise<any> => {
         details: error.errors.map((e: any) => e.message)
       });
     }
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const checkOutTable = async (req: Request, res: Response): Promise<any> => {
+  const userId = req.user?.id;
+  const { checkInDate, capacity } = req.body;
+
+  try {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
+
+    if (!checkInDate || !capacity) return res.status(400).json({ error: 'Missing required fields: checkInDate or capacity' });
+
+    const checkIn = new Date(checkInDate);
+
+    const table = await Table.findOne({
+      where: { capacity, isAvailable: true },
+      include: {
+        model: Booking,
+        as: 'bookings',
+        where: {
+          checkInDate: { [Op.lte]: checkInDate },
+          checkOutDate: { [Op.gte]: checkInDate }
+        },
+        required: false
+      }
+    });
+
+    if (!table) return res.status(404).json({ error: 'No available table with the specified capacity.' });
+
+    const existingBooking = await Booking.findOne({
+      where: {
+        userId,
+        tableId: table.id,
+        checkInDate: { [Op.lte]: checkIn },
+        status: 'active'
+      }
+    });
+
+    if (existingBooking) return res.status(400).json({ error: 'You already have a booking for this table at the specified time.' });
+
+    const booking = await Booking.create({
+      userId,
+      tableId: table.id,
+      price: table.price,
+      checkInDate: checkIn,
+      checkOutDate: null
+    });
+
+    await table.update({ isAvailable: false });
+
+    return res.status(201).json({
+      message: 'Table booked successfully',
+      booking
+    });
+  } catch (error: any) {
+    console.error('Error in [bookTable]:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const endTable = async (req: Request, res: Response): Promise<any> => {
+  const { bookingId } = req.params;
+
+  if (!bookingId) return res.status(400).json({ error: 'Missing required field: bookingId' });
+
+  try {
+    const booking = await Booking.findOne({
+      where: { id: bookingId, checkOutDate: null }
+    });
+
+    if (!booking) return res.status(404).json({ error: 'Booking not found or already completed.' });
+
+    const checkIn = new Date(booking.checkInDate);
+    const currentTime = new Date();
+
+    const timeDifference = currentTime.getTime() - checkIn.getTime();
+    const hours = timeDifference / (1000 * 60 * 60);
+    const minutes = Math.floor(timeDifference / (1000 * 60)) % 60;
+
+    let timeDisplay;
+    hours >= 1 ? (timeDisplay = `${Math.floor(hours)} hours ${minutes} minutes`) : (timeDisplay = `${minutes} minutes`);
+
+    const price = Math.round(booking.price * hours);
+
+    await booking.update({
+      checkOutDate: currentTime,
+      price: price,
+      status: 'completed'
+    });
+
+    const table = await Table.findByPk(booking.tableId);
+    await table?.update({ isAvailable: true });
+
+    const receipt = {
+      bookingId: booking.id,
+      tableId: booking.tableId,
+      checkInDate: booking.checkInDate,
+      checkOutDate: currentTime,
+      time: timeDisplay,
+      amount: price
+    };
+
+    return res.status(200).json({
+      message: 'Booking completed successfully.',
+      receipt: receipt
+    });
+  } catch (error: any) {
+    console.error('Error in [endBooking]:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
