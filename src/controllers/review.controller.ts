@@ -45,7 +45,7 @@ export const create = async (req: Request, res: Response): Promise<any> => {
 };
 
 export const getRoomReviews = async (req: Request, res: Response): Promise<any> => {
-  const { roomType } = req.body;
+  const { roomType } = req.params;
 
   try {
     const reviews = await Review.findAll({

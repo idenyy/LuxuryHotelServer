@@ -9,6 +9,6 @@ router.post('/', add);
 
 // Review
 router.post('/reviews', authorization, create);
-router.get('/reviews', getRoomReviews);
+router.get('/:roomType/reviews', getRoomReviews);
 
 export default router;
