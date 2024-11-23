@@ -14,7 +14,9 @@ export const create = async (req: Request, res: Response): Promise<any> => {
       where: { userId },
       include: {
         model: Room,
-        where: { type: roomType }
+        where: { type: roomType },
+        required: true,
+        as: 'room'
       }
     });
     if (!bookingExists) return res.status(403).json({ error: 'You cannot leave a review for a room you have not booked' });
