@@ -30,7 +30,7 @@ Review.init(
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE'
     },
-    rootType: {
+    roomType: {
       type: DataTypes.STRING,
       allowNull: false
     },
