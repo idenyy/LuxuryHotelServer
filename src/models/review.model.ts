@@ -6,7 +6,7 @@ import Room from './room.model.js';
 class Review extends Model {
   declare id: number;
   declare userId: number;
-  declare roomId: number;
+  declare rootType: string;
   declare rating: number;
   declare comment?: string;
   declare readonly createdAt: Date;
@@ -30,15 +30,9 @@ Review.init(
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE'
     },
-    roomId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: Room,
-        key: 'id'
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+    rootType: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
     rating: {
       type: DataTypes.INTEGER,

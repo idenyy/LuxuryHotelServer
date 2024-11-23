@@ -7,13 +7,14 @@ import Room from '../models/room.model.js';
 
 export const create = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { roomId, rating, comment } = req.body;
+  const { roomType, rating, comment } = req.body;
 
   try {
     const bookingExists = await Booking.findOne({
-      where: {
-        userId,
-        roomId
+      where: { userId },
+      include: {
+        model: Room,
+        where: { type: roomType }
       }
     });
     if (!bookingExists) return res.status(403).json({ error: 'You cannot leave a review for a room you have not booked' });
@@ -21,24 +22,17 @@ export const create = async (req: Request, res: Response): Promise<any> => {
     const reviewExists = await Review.findOne({
       where: {
         userId,
-        roomId
+        roomType
       }
     });
     if (reviewExists) return res.status(409).json({ error: 'You have already left a review for this room' });
 
     const review = await Review.create({
       userId,
-      roomId,
+      roomType,
       rating,
-      comment,
-      createdAt: new Date()
+      comment
     });
-
-    const room = await Room.findByPk(roomId);
-    if (room) {
-      const updatedReviews = [...(room.Reviews || []), review];
-      await room.update({ Reviews: updatedReviews });
-    }
 
     return res.status(201).json({
       message: 'Review successfully created',
@@ -51,11 +45,11 @@ export const create = async (req: Request, res: Response): Promise<any> => {
 };
 
 export const getRoomReviews = async (req: Request, res: Response): Promise<any> => {
-  const { roomId } = req.params;
+  const { roomType } = req.body;
 
   try {
     const reviews = await Review.findAll({
-      where: { roomId },
+      where: { roomType },
       include: {
         model: User,
         as: 'user',

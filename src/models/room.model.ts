@@ -1,7 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/db.js';
 import Booking from './booking.model.js';
-import Review from './review.model.js';
 
 class Room extends Model {
   declare id: number;
@@ -15,7 +14,6 @@ class Room extends Model {
   declare readonly updatedAt: Date;
 
   declare Bookings?: Booking[];
-  declare Reviews?: Review[];
 }
 
 Room.init(
@@ -50,11 +48,6 @@ Room.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true
-    },
-    Reviews: {
-      type: DataTypes.ARRAY(DataTypes.JSON),
-      allowNull: true,
-      defaultValue: []
     }
   },
   {
