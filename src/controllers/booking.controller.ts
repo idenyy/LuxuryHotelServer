@@ -222,6 +222,7 @@ export const updateRoomAvailability = async () => {
     const bookings = await Booking.findAll({
       where: {
         checkOutDate: { [Op.lte]: new Date() },
+        tableId: null,
         status: 'active'
       }
     });
