@@ -222,19 +222,9 @@ export const updateRoomAvailability = async () => {
     const bookings = await Booking.findAll({
       where: {
         checkOutDate: { [Op.lte]: new Date() },
-        status: 'completed'
+        status: 'active'
       }
     });
-
-    for (const booking of bookings) {
-      const room = await Room.findByPk(booking.roomId);
-      if (room && !room.isAvailable) {
-        await room.update({ isAvailable: true });
-        console.log(`Room ${room.id} is now available.`);
-      }
-
-      await booking.update({ status: 'completed!!!!!!!!!!!!!!!!' });
-    }
 
     for (const booking of bookings) {
       const room = await Room.findByPk(booking.roomId);
@@ -242,12 +232,12 @@ export const updateRoomAvailability = async () => {
       if (room) {
         if (!room.isAvailable) {
           await room.update({ isAvailable: true });
-          console.log(`Room ${room.id} is now available.`);
+          console.log(`Room ${room.id} is now available`);
         }
 
         await booking.update({ status: 'completed' });
       } else {
-        console.log(`Кімната з ID ${booking.roomId} не знайдена.`);
+        console.error(`Room with ID:${booking.roomId} Not Found`);
       }
     }
   } catch (error) {

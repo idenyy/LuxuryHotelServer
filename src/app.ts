@@ -38,7 +38,7 @@ app.use('/api/user', userRoute);
 app.use('/api/room', roomRoute);
 app.use('/api/booking', bookingRoute);
 
-cron.schedule('*/5 * * * *', async () => {
+cron.schedule('0 */12 * * *', async () => {
   console.log('Running room availability update...');
   await updateRoomAvailability();
 });
