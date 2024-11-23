@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/db.js';
 import Booking from './booking.model.js';
+import Review from './review.model.js';
 
 class Room extends Model {
   declare id: number;
@@ -14,6 +15,7 @@ class Room extends Model {
   declare readonly updatedAt: Date;
 
   declare Bookings?: Booking[];
+  declare Reviews?: Review[];
 }
 
 Room.init(
@@ -21,40 +23,45 @@ Room.init(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
     number: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      unique: true,
+      unique: true
     },
     type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
     price: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: false
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     },
     beds: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
     isAvailable: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true,
+      defaultValue: true
     },
+    Reviews: {
+      type: DataTypes.ARRAY(DataTypes.JSON),
+      allowNull: true,
+      defaultValue: []
+    }
   },
   {
     sequelize,
     modelName: 'Room',
     tableName: 'rooms',
-    timestamps: true,
+    timestamps: true
   }
 );
 

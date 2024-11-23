@@ -25,7 +25,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       email,
       password,
       verificationCode,
-      verificationCodeExpiry: Date.now() + 10 * 60 * 1000, // 10 хвилин
+      verificationCodeExpiry: Date.now() + 10 * 60 * 1000 // 10 хвилин
     };
     const token = jwt.sign(signupData, process.env.JWT_AUTH!, { expiresIn: '10m' });
 
@@ -33,13 +33,13 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 10 * 60 * 1000,
+      maxAge: 10 * 60 * 1000
     });
 
     await sendMail(email, verificationCode);
 
     return res.status(200).json({
-      message: 'Verification code sent. Please check your email',
+      message: 'Verification code sent. Please check your email'
     });
   } catch (error: any) {
     console.error(`Error in [signup]: ${error.message}`);
@@ -68,7 +68,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: hashedPassword
     });
 
     if (user) {
@@ -81,7 +81,7 @@ export const signupComplete = async (req: Request, res: Response): Promise<any> 
       return res.status(201).json({
         token,
         user: userResponse,
-        message: 'Signup Successfully',
+        message: 'Signup Successfully'
       });
     }
   } catch (error: any) {
@@ -110,7 +110,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role
       });
     }
 
@@ -133,8 +133,7 @@ export const logout = async (req: Request, res: Response): Promise<any> => {
 
 export const authCheck = async (req: Request, res: Response): Promise<any> => {
   try {
-    console.log(req.user);
-    const user = await User.findOne({ where: { id: req.user.id }, attributes: { exclude: ['password'] } });
+    const user = await User.findOne({ where: { id: req.user?.id }, attributes: { exclude: ['password'] } });
     if (!user) return res.status(404).json({ error: 'User Not Found' });
 
     const token = generateToken(user.id, res);

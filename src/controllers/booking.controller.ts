@@ -28,12 +28,12 @@ export const checkOut = async (req: Request, res: Response): Promise<any> => {
             { checkOutDate: { [Op.between]: [checkIn, checkOut] } },
             {
               checkInDate: { [Op.lte]: checkIn },
-              checkOutDate: { [Op.gte]: checkOut },
-            },
-          ],
+              checkOutDate: { [Op.gte]: checkOut }
+            }
+          ]
         },
-        required: false,
-      },
+        required: false
+      }
     });
 
     if (!room) return res.status(404).json({ error: 'No available rooms with the specified number of beds and dates.' });
@@ -44,8 +44,8 @@ export const checkOut = async (req: Request, res: Response): Promise<any> => {
         roomId: room.id,
         checkInDate: { [Op.lte]: checkOut },
         checkOutDate: { [Op.gte]: checkIn },
-        status: 'active',
-      },
+        status: 'active'
+      }
     });
     if (existingBooking) return res.status(400).json({ error: 'You already have a booking for this room during these dates.' });
 
@@ -58,8 +58,7 @@ export const checkOut = async (req: Request, res: Response): Promise<any> => {
       price,
       extraServices: extraServices || [],
       checkInDate: checkIn,
-      checkOutDate: checkOut,
-      status: 'active',
+      checkOutDate: checkOut
     });
 
     await room.update({ isAvailable: false });
@@ -70,7 +69,7 @@ export const checkOut = async (req: Request, res: Response): Promise<any> => {
     if (error.name === 'SequelizeValidationError') {
       return res.status(400).json({
         error: 'Validation failed',
-        details: error.errors.map((e: any) => e.message),
+        details: error.errors.map((e: any) => e.message)
       });
     }
     return res.status(500).json({ error: 'Internal Server Error' });
@@ -89,9 +88,9 @@ export const cancel = async (req: Request, res: Response): Promise<any> => {
       include: [
         {
           model: Room,
-          as: 'room',
-        },
-      ],
+          as: 'room'
+        }
+      ]
     });
 
     if (!booking) return res.status(404).json({ error: 'Booking Not Found' });
@@ -112,8 +111,8 @@ export const updateRoomAvailability = async () => {
     const bookings = await Booking.findAll({
       where: {
         checkOutDate: { [Op.lte]: new Date() },
-        status: 'active',
-      },
+        status: 'active'
+      }
     });
 
     for (const booking of bookings) {

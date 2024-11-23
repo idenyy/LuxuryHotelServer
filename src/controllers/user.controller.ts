@@ -14,10 +14,10 @@ export const getBookings = async (req: Request, res: Response): Promise<any> => 
         {
           model: Room,
           as: 'room',
-          attributes: ['number', 'type', 'price', 'description', 'beds'],
-        },
+          attributes: ['number', 'type', 'price', 'description', 'beds', 'Reviews']
+        }
       ],
-      order: [['checkInDate', 'ASC']],
+      order: [['checkInDate', 'ASC']]
     });
 
     if (!bookings || bookings.length === 0) return res.status(404).json({ message: 'No bookings found for this user.' });
