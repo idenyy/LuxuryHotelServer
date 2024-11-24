@@ -30,7 +30,7 @@ app.use(
 connectPostgres();
 
 cron.schedule(
-  '2 * * * *',
+  '*/2 * * * *',
   async () => {
     console.log('Running room availability update...');
     await updateRoomAvailability();
