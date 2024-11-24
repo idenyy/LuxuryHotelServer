@@ -24,8 +24,6 @@ export const authorization = async (req: Request, res: Response, next: NextFunct
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   const token = (req.headers.authorization || '').replace(/Bearer\s?/, '') || req.cookies.jwt;
-  console.log('Token verification: ', token);
-  console.log(req.cookies.jwt);
   if (token) {
     try {
       req.user = jwt.verify(token, process.env.JWT_SECRET as string);
