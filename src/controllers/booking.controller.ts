@@ -153,7 +153,7 @@ export const extendRoom = async (req: Request, res: Response): Promise<any> => {
     if (conflictingBooking) return res.status(400).json({ error: 'The new check-out date conflicts with another booking for this room.' });
 
     booking.checkOutDate = newDate;
-    booking.price = price;
+    booking.price = booking.price + price;
     await booking.save();
 
     return res.status(200).json({ message: 'Booking extended successfully', booking });
