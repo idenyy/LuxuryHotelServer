@@ -154,7 +154,7 @@ export const extendRoom = async (req: Request, res: Response): Promise<any> => {
 
     booking.checkOutDate = newDate;
     booking.price = Number(booking.price) + Number(price);
-    booking.extraServices = booking.extraServices?.concat(extraServices);
+    booking.extraServices = booking.extraServices?.concat(!extraServices ? [] : extraServices);
     await booking.save();
 
     return res.status(200).json({ message: 'Booking extended successfully', booking });
