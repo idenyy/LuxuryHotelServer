@@ -1,13 +1,14 @@
 import express from 'express';
-import { cancel, checkOutRoom, checkOutTable, endTable } from '../controllers/booking.controller.js';
+import { cancelRoom, cancelTable, checkRoom, checkTable, extendRoom } from '../controllers/booking.controller.js';
 import { authorization } from '../middleware/authorization.js';
 
 const router = express.Router();
 
-router.post('/room', authorization, checkOutRoom);
-router.put('/cancel', authorization, cancel);
+router.post('/room', authorization, checkRoom);
+router.put('/room/cancel', authorization, cancelRoom);
+router.put('/room/extend', authorization, extendRoom);
 
-router.post('/table', authorization, checkOutTable);
-router.put('/table/:bookingId', authorization, endTable);
+router.post('/table', authorization, checkTable);
+router.put('/table/:bookingId', authorization, cancelTable);
 
 export default router;

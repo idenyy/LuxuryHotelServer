@@ -5,7 +5,7 @@ import Room from '../models/room.model.js';
 import Booking from '../models/booking.model.js';
 import Table from '../models/table.model.js';
 
-export const checkOutRoom = async (req: Request, res: Response): Promise<any> => {
+export const checkRoom = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
   const { checkInDate, checkOutDate, beds, extraServices, type, price } = req.body;
 
@@ -16,8 +16,6 @@ export const checkOutRoom = async (req: Request, res: Response): Promise<any> =>
 
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
-
-    checkOut.setHours(checkOut.getHours() + 2);
 
     if (checkIn >= checkOut) return res.status(400).json({ error: 'Check-out date must be later than check-in date' });
 
@@ -76,8 +74,96 @@ export const checkOutRoom = async (req: Request, res: Response): Promise<any> =>
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+export const cancelRoom = async (req: Request, res: Response): Promise<any> => {
+  const userId = req.user?.id;
+  const { bookingId } = req.body;
 
-export const checkOutTable = async (req: Request, res: Response): Promise<any> => {
+  try {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+
+    const booking = await Booking.findOne({
+      where: { id: bookingId, userId },
+      include: [
+        {
+          model: Room,
+          as: 'room'
+        }
+      ]
+    });
+
+    if (!booking) return res.status(404).json({ error: 'Booking Not Found' });
+
+    booking.status = 'canceled';
+    await booking.save();
+
+    await booking.room?.update({ isAvailable: true });
+
+    return res.status(200).json({ message: 'Booking canceled successfully', booking });
+  } catch (error: any) {
+    console.error(`Error in [cancelRoom]: ${error.message}`);
+  }
+};
+export const extendRoom = async (req: Request, res: Response): Promise<any> => {
+  const userId = req.user?.id;
+  const { bookingId, newCheckOutDate, price } = req.body;
+
+  try {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
+    if (!bookingId || !newCheckOutDate) return res.status(400).json({ error: 'Missing required fields: bookingId or newCheckOutDate.' });
+
+    const newDate = new Date(newCheckOutDate);
+    newDate.setHours(newDate.getHours() + 2);
+    if (isNaN(newDate.getTime())) return res.status(400).json({ error: 'Invalid Date Format' });
+
+    const booking = await Booking.findOne({
+      where: {
+        id: bookingId,
+        userId,
+        status: 'active'
+      },
+      include: [
+        {
+          model: Room,
+          as: 'room'
+        }
+      ]
+    });
+    if (!booking) return res.status(404).json({ error: 'Booking Not Found or Not Active' });
+
+    const currentDate = new Date(booking.checkOutDate as Date);
+    currentDate.setHours(currentDate.getHours() + 2);
+
+    if (newDate <= currentDate) return res.status(400).json({ error: 'New check-out date must be later than the current check-out date' });
+
+    const conflictingBooking = await Booking.findOne({
+      where: {
+        roomId: booking.roomId,
+        status: 'active',
+        id: { [Op.ne]: bookingId },
+        [Op.or]: [
+          { checkInDate: { [Op.between]: [booking.checkOutDate, newDate] } },
+          { checkOutDate: { [Op.between]: [booking.checkOutDate, newDate] } },
+          {
+            checkInDate: { [Op.lte]: booking.checkOutDate },
+            checkOutDate: { [Op.gte]: newDate }
+          }
+        ]
+      }
+    });
+    if (conflictingBooking) return res.status(400).json({ error: 'The new check-out date conflicts with another booking for this room.' });
+
+    booking.checkOutDate = newDate;
+    booking.price = price;
+    await booking.save();
+
+    return res.status(200).json({ message: 'Booking extended successfully', booking });
+  } catch (error: any) {
+    console.error('Error in [extendBooking]:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const checkTable = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
   const { checkInDate, capacity } = req.body;
 
@@ -133,8 +219,7 @@ export const checkOutTable = async (req: Request, res: Response): Promise<any> =
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-export const endTable = async (req: Request, res: Response): Promise<any> => {
+export const cancelTable = async (req: Request, res: Response): Promise<any> => {
   const { bookingId } = req.params;
 
   if (!bookingId) return res.status(400).json({ error: 'Missing required field: bookingId' });
@@ -183,36 +268,6 @@ export const endTable = async (req: Request, res: Response): Promise<any> => {
   } catch (error: any) {
     console.error('Error in [endBooking]:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-export const cancel = async (req: Request, res: Response): Promise<any> => {
-  const userId = req.user?.id;
-  const { bookingId } = req.body;
-
-  try {
-    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
-
-    const booking = await Booking.findOne({
-      where: { id: bookingId, userId },
-      include: [
-        {
-          model: Room,
-          as: 'room'
-        }
-      ]
-    });
-
-    if (!booking) return res.status(404).json({ error: 'Booking Not Found' });
-
-    booking.status = 'canceled';
-    await booking.save();
-
-    await booking.room?.update({ isAvailable: true });
-
-    return res.status(200).json({ message: 'Booking canceled successfully', booking });
-  } catch (error: any) {
-    console.error(`Error in [cancel]: ${error.message}`);
   }
 };
 
