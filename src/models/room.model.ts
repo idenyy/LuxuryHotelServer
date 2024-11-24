@@ -6,7 +6,6 @@ class Room extends Model {
   declare id: number;
   declare number: number;
   declare type: string;
-  declare price: number;
   declare description?: string;
   declare beds: number;
   declare isAvailable: boolean;

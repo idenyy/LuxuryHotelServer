@@ -7,7 +7,7 @@ import Table from '../models/table.model.js';
 
 export const checkOutRoom = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { checkInDate, checkOutDate, beds, extraServices, type } = req.body;
+  const { checkInDate, checkOutDate, beds, extraServices, type, price } = req.body;
 
   try {
     if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
@@ -51,13 +51,10 @@ export const checkOutRoom = async (req: Request, res: Response): Promise<any> =>
     });
     if (existingBooking) return res.status(400).json({ error: 'You already have a booking for this room during these dates.' });
 
-    const days = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24);
-    const price = Math.round(room.price * days);
-
     const booking = await Booking.create({
       userId,
       roomId: room.id,
-      price,
+      price: price,
       extraServices: extraServices || [],
       checkInDate: checkIn,
       checkOutDate: checkOut
