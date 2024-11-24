@@ -54,7 +54,7 @@ export const getRoomReviews = async (req: Request, res: Response): Promise<any> 
     });
 
     const totalReviews = reviews.length;
-    const averageRating = totalReviews > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews : 0;
+    const averageRating = totalReviews > 0 ? reviews.reduce((sum, review) => sum + Number(review.rating), 0) / totalReviews : 0;
 
     return res.status(200).json({
       reviews,
