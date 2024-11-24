@@ -213,7 +213,7 @@ export const cancel = async (req: Request, res: Response): Promise<any> => {
 
     return res.status(200).json({ message: 'Booking canceled successfully', booking });
   } catch (error: any) {
-    console.error(`Error in [checkOut]: ${error.message}`);
+    console.error(`Error in [cancel]: ${error.message}`);
   }
 };
 
