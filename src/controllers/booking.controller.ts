@@ -105,7 +105,7 @@ export const cancelRoom = async (req: Request, res: Response): Promise<any> => {
 };
 export const extendRoom = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { bookingId, newCheckOutDate, price } = req.body;
+  const { bookingId, newCheckOutDate, price, extraServices } = req.body;
 
   try {
     if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
@@ -154,6 +154,7 @@ export const extendRoom = async (req: Request, res: Response): Promise<any> => {
 
     booking.checkOutDate = newDate;
     booking.price = Number(booking.price) + Number(price);
+    booking.extraServices = booking.extraServices?.concat(extraServices);
     await booking.save();
 
     return res.status(200).json({ message: 'Booking extended successfully', booking });
