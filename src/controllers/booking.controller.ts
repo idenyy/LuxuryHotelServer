@@ -17,6 +17,8 @@ export const checkOutRoom = async (req: Request, res: Response): Promise<any> =>
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
 
+    checkOut.setHours(checkOut.getHours() + 2);
+
     if (checkIn >= checkOut) return res.status(400).json({ error: 'Check-out date must be later than check-in date' });
 
     const room = await Room.findOne({
@@ -216,9 +218,12 @@ export const cancel = async (req: Request, res: Response): Promise<any> => {
 
 export const updateRoomAvailability = async () => {
   try {
+    const date = new Date();
+    date.setHours(date.getHours() + 2);
+
     const bookings = await Booking.findAll({
       where: {
-        checkOutDate: { [Op.lte]: new Date() },
+        checkOutDate: { [Op.lte]: date },
         tableId: null,
         status: 'active'
       }
