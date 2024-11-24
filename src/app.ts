@@ -29,15 +29,6 @@ app.use(
 
 connectPostgres();
 
-app.get('/', (req: Request, res: Response) => {
-  res.status(200).send(`Server is working...`);
-});
-
-app.use('/api/auth', authRoute);
-app.use('/api/user', userRoute);
-app.use('/api/room', roomRoute);
-app.use('/api/booking', bookingRoute);
-
 cron.schedule(
   '2 * * * *',
   async () => {
@@ -48,5 +39,14 @@ cron.schedule(
     timezone: 'Europe/Kyiv'
   }
 );
+
+app.get('/', (req: Request, res: Response) => {
+  res.status(200).send(`Server is working...`);
+});
+
+app.use('/api/auth', authRoute);
+app.use('/api/user', userRoute);
+app.use('/api/room', roomRoute);
+app.use('/api/booking', bookingRoute);
 
 export default app;
