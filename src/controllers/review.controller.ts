@@ -3,34 +3,28 @@ import { Request, Response } from 'express';
 import Review from '../models/review.model.js';
 import User from '../models/user.model.js';
 import Booking from '../models/booking.model.js';
-import Room from '../models/room.model.js';
 
 export const create = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { roomType, rating, comment } = req.body;
+  const { roomId, roomType, rating, comment } = req.body;
 
   try {
     const bookingExists = await Booking.findOne({
-      where: { userId },
-      include: {
-        model: Room,
-        as: 'room',
-        where: { type: roomType },
-        required: true
-      }
+      where: { userId, roomId }
     });
     if (!bookingExists) return res.status(403).json({ error: 'You cannot leave a review for a room you have not booked' });
 
     const reviewExists = await Review.findOne({
       where: {
         userId,
-        roomType
+        roomId
       }
     });
     if (reviewExists) return res.status(409).json({ error: 'You have already left a review for this room' });
 
     const review = await Review.create({
       userId,
+      roomId,
       roomType,
       rating,
       comment

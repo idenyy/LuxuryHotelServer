@@ -52,7 +52,7 @@ export const checkOutRoom = async (req: Request, res: Response): Promise<any> =>
     if (existingBooking) return res.status(400).json({ error: 'You already have a booking for this room during these dates.' });
 
     const days = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24);
-    const price = room.price * days;
+    const price = Math.round(room.price * days);
 
     const booking = await Booking.create({
       userId,
