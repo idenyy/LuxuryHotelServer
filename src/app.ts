@@ -38,9 +38,15 @@ app.use('/api/user', userRoute);
 app.use('/api/room', roomRoute);
 app.use('/api/booking', bookingRoute);
 
-cron.schedule('0 */12 * * *', async () => {
-  console.log('Running room availability update...');
-  await updateRoomAvailability();
-});
+cron.schedule(
+  '2 * * * *',
+  async () => {
+    console.log('Running room availability update...');
+    await updateRoomAvailability();
+  },
+  {
+    timezone: 'Europe/Kyiv'
+  }
+);
 
 export default app;
