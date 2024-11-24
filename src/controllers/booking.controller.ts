@@ -235,7 +235,7 @@ export const updateRoomAvailability = async () => {
       if (room) {
         if (!room.isAvailable) {
           await room.update({ isAvailable: true });
-          console.log(`Room ${room.id} is now available`);
+          console.log(`Room with ID:${room.id} is now available`);
         }
 
         await booking.update({ status: 'completed' });
