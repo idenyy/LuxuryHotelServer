@@ -165,7 +165,7 @@ export const extendRoom = async (req: Request, res: Response): Promise<any> => {
 };
 export const addServices = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { bookingId, services } = req.body;
+  const { bookingId, services, price } = req.body;
 
   try {
     if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
@@ -186,6 +186,8 @@ export const addServices = async (req: Request, res: Response): Promise<any> => 
     if (!booking) return res.status(404).json({ error: 'Booking Not Found or Not Active' });
 
     booking.extraServices = booking.extraServices?.concat(!services ? [] : services);
+    booking.price = Number(booking.price) + Number(price);
+
     await booking.save();
 
     return res.status(200).json({ message: 'Booking extended successfully', booking });
