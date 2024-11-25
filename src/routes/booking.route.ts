@@ -10,6 +10,6 @@ router.put('/room/extend', authorization, extendRoom);
 router.put('/room/services', authorization, addServices);
 
 router.post('/table', authorization, checkTable);
-router.put('/table/:bookingId', authorization, cancelTable);
+router.put('/table/cancel', authorization, cancelTable);
 
 export default router;

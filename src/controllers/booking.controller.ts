@@ -254,7 +254,7 @@ export const checkTable = async (req: Request, res: Response): Promise<any> => {
   }
 };
 export const cancelTable = async (req: Request, res: Response): Promise<any> => {
-  const { bookingId } = req.params;
+  const { bookingId } = req.body;
 
   if (!bookingId) return res.status(400).json({ error: 'Missing required field: bookingId' });
 
