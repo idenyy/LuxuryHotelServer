@@ -270,6 +270,7 @@ export const endTable = async (req: Request, res: Response): Promise<any> => {
 
     const checkIn = new Date(booking.checkInDate);
     const currentTime = new Date();
+    currentTime.setHours(currentTime.getHours() + 2);
 
     const timeDifference = currentTime.getTime() - checkIn.getTime();
     const hours = timeDifference / (1000 * 60 * 60);
