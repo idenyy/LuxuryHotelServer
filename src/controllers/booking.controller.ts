@@ -208,6 +208,7 @@ export const checkTable = async (req: Request, res: Response): Promise<any> => {
     if (!checkInDate || !capacity) return res.status(400).json({ error: 'Missing required fields: checkInDate or capacity' });
 
     const checkIn = new Date(checkInDate);
+    checkIn.setHours(checkIn.getHours() + 2);
 
     const table = await Table.findOne({
       where: { isAvailable: true },
