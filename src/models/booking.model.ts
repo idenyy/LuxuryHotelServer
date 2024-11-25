@@ -12,6 +12,7 @@ class Booking extends Model {
   declare price: number;
   declare extraServices?: string[];
   declare status?: string;
+  declare capacity: number;
 
   declare room?: Room;
   declare table?: Table;
@@ -71,6 +72,10 @@ Booking.init(
       type: DataTypes.STRING,
       allowNull: true,
       defaultValue: 'active'
+    },
+    capacity: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     checkInDate: {
       type: DataTypes.DATE,

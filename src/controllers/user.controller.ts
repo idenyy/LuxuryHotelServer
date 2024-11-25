@@ -14,7 +14,7 @@ export const getBookings = async (req: Request, res: Response): Promise<any> => 
         {
           model: Room,
           as: 'room',
-          attributes: ['number', 'type', 'description', 'beds']
+          attributes: ['number', 'type', 'description', 'capacity']
         }
       ],
       order: [['checkInDate', 'ASC']]

@@ -7,12 +7,12 @@ import Table from '../models/table.model.js';
 
 export const checkRoom = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { checkInDate, checkOutDate, beds, extraServices, type, price } = req.body;
+  const { checkInDate, checkOutDate, capacity, extraServices, type, price } = req.body;
 
   try {
     if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
 
-    if (!checkInDate || !checkOutDate || !beds) return res.status(400).json({ error: 'Missing required fields: checkInDate, checkOutDate, or beds' });
+    if (!checkInDate || !checkOutDate || !capacity) return res.status(400).json({ error: 'Missing required fields: checkInDate, checkOutDate, or capacity' });
 
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
@@ -20,7 +20,7 @@ export const checkRoom = async (req: Request, res: Response): Promise<any> => {
     if (checkIn >= checkOut) return res.status(400).json({ error: 'Check-out date must be later than check-in date' });
 
     const room = await Room.findOne({
-      where: { type: type, beds, isAvailable: true },
+      where: { type: type, capacity, isAvailable: true },
       include: {
         model: Booking,
         as: 'bookings',
@@ -38,7 +38,7 @@ export const checkRoom = async (req: Request, res: Response): Promise<any> => {
       }
     });
 
-    if (!room) return res.status(404).json({ error: 'No available rooms with the specified number of beds and dates.' });
+    if (!room) return res.status(404).json({ error: 'No available rooms with the specified number of capacity and dates.' });
 
     const existingBooking = await Booking.findOne({
       where: {
@@ -55,6 +55,7 @@ export const checkRoom = async (req: Request, res: Response): Promise<any> => {
       userId,
       roomId: room.id,
       price: price,
+      capacity: capacity,
       extraServices: extraServices || [],
       checkInDate: checkIn,
       checkOutDate: checkOut
@@ -209,7 +210,7 @@ export const checkTable = async (req: Request, res: Response): Promise<any> => {
     const checkIn = new Date(checkInDate);
 
     const table = await Table.findOne({
-      where: { capacity, isAvailable: true },
+      where: { isAvailable: true },
       include: {
         model: Booking,
         as: 'bookings',
@@ -238,6 +239,7 @@ export const checkTable = async (req: Request, res: Response): Promise<any> => {
       userId,
       tableId: table.id,
       price: table.price,
+      capacity: capacity,
       checkInDate: checkIn,
       checkOutDate: null
     });
@@ -253,7 +255,7 @@ export const checkTable = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-export const cancelTable = async (req: Request, res: Response): Promise<any> => {
+export const endTable = async (req: Request, res: Response): Promise<any> => {
   const { bookingId } = req.body;
 
   if (!bookingId) return res.status(400).json({ error: 'Missing required field: bookingId' });

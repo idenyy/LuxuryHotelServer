@@ -4,7 +4,7 @@ import Review from '../models/review.model.js';
 import User from '../models/user.model.js';
 import Booking from '../models/booking.model.js';
 
-export const create = async (req: Request, res: Response): Promise<any> => {
+export const createReview = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
   const { roomId, roomType, rating, comment } = req.body;
 

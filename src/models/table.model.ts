@@ -5,7 +5,6 @@ import Booking from './booking.model.js';
 class Table extends Model {
   declare id: number;
   declare number: number;
-  declare capacity: number;
   declare price: number;
   declare isAvailable: boolean;
   declare readonly createdAt: Date;
@@ -26,7 +25,6 @@ Table.init(
       allowNull: false,
       unique: true
     },
-    capacity: { type: DataTypes.INTEGER, allowNull: false },
     price: {
       type: DataTypes.INTEGER,
       allowNull: false

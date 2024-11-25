@@ -7,7 +7,7 @@ class Room extends Model {
   declare number: number;
   declare type: string;
   declare description?: string;
-  declare beds: number;
+  declare capacity: number;
   declare isAvailable: boolean;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
@@ -35,7 +35,7 @@ Room.init(
       type: DataTypes.STRING,
       allowNull: true
     },
-    beds: {
+    capacity: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
