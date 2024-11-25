@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import Room from '../models/room.model.js';
 
 export const add = async (req: Request, res: Response): Promise<any> => {
-  const { number, type, price, description, beds } = req.body;
+  const { number, type, description, beds } = req.body;
 
-  if (!number || !type || !price || !beds) return res.status(400).json({ message: 'Missing required fields' });
+  if (!number || !type || !beds) return res.status(400).json({ message: 'Missing required fields' });
 
   try {
     const room = await Room.findOne({ where: { number } });
@@ -14,9 +14,8 @@ export const add = async (req: Request, res: Response): Promise<any> => {
     const newRoom = await Room.create({
       number,
       type,
-      price,
       description,
-      beds,
+      beds
     });
 
     return res.status(201).json(newRoom);
