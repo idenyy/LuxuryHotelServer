@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import Room from '../models/room.model.js';
 import Booking from '../models/booking.model.js';
-import Table from '../models/table.model.js';
 
 export const getBookings = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
@@ -11,18 +9,6 @@ export const getBookings = async (req: Request, res: Response): Promise<any> => 
 
     const bookings = await Booking.findAll({
       where: { userId },
-      include: [
-        {
-          model: Room,
-          as: 'room',
-          attributes: ['number', 'type', 'description', 'capacity']
-        },
-        {
-          model: Table,
-          as: 'table',
-          attributes: ['number', 'price']
-        }
-      ],
       order: [['checkInDate', 'ASC']]
     });
 
