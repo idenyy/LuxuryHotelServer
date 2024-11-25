@@ -105,10 +105,10 @@ export const cancelRoom = async (req: Request, res: Response): Promise<any> => {
 };
 export const extendRoom = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { bookingId, newCheckOutDate, price, extraServices } = req.body;
+  const { bookingId, newCheckOutDate, price } = req.body;
 
   try {
-    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
+    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
     if (!bookingId || !newCheckOutDate) return res.status(400).json({ error: 'Missing required fields: bookingId or newCheckOutDate.' });
 
     const newDate = new Date(newCheckOutDate);
@@ -154,7 +154,38 @@ export const extendRoom = async (req: Request, res: Response): Promise<any> => {
 
     booking.checkOutDate = newDate;
     booking.price = Number(booking.price) + Number(price);
-    booking.extraServices = booking.extraServices?.concat(!extraServices ? [] : extraServices);
+
+    await booking.save();
+
+    return res.status(200).json({ message: 'Booking extended successfully', booking });
+  } catch (error: any) {
+    console.error('Error in [extendBooking]:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+export const addServices = async (req: Request, res: Response): Promise<any> => {
+  const userId = req.user?.id;
+  const { bookingId, services } = req.body;
+
+  try {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
+
+    const booking = await Booking.findOne({
+      where: {
+        id: bookingId,
+        userId,
+        status: 'active'
+      },
+      include: [
+        {
+          model: Room,
+          as: 'room'
+        }
+      ]
+    });
+    if (!booking) return res.status(404).json({ error: 'Booking Not Found or Not Active' });
+
+    booking.extraServices = booking.extraServices?.concat(!services ? [] : services);
     await booking.save();
 
     return res.status(200).json({ message: 'Booking extended successfully', booking });
