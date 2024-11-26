@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Booking from '../models/booking.model.js';
-import Room from '../models/room.model';
-import Table from '../models/table.model';
+import Room from '../models/room.model.js';
+import Table from '../models/table.model.js';
 
 export const getBookings = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;

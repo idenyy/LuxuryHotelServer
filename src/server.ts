@@ -1,6 +1,6 @@
 import app from './app.js';
 import cron from 'node-cron';
-import { updateRoomAvailability } from './controllers/booking.controller';
+import { updateRoomAvailability } from './controllers/booking.controller.js';
 
 const PORT = process.env.PORT || 5000;
 
