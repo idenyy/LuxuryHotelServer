@@ -3,13 +3,11 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import cron from 'node-cron';
 
 import connectPostgres from './config/db.js';
 import authRoute from './routes/auth.route.js';
 import roomRoute from './routes/room.route.js';
 import bookingRoute from './routes/booking.route.js';
-import { updateRoomAvailability } from './controllers/booking.controller.js';
 import userRoute from './routes/user.route.js';
 
 dotenv.config();
@@ -28,17 +26,6 @@ app.use(
 );
 
 connectPostgres();
-
-cron.schedule(
-  '0 */12 * * *',
-  async () => {
-    console.log('Running room availability update...');
-    await updateRoomAvailability();
-  },
-  {
-    timezone: 'Europe/Kyiv'
-  }
-);
 
 app.get('/', (req: Request, res: Response) => {
   res.status(200).send(`Server is working...`);
