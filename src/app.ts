@@ -23,13 +23,13 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com/', 'https://luxury-hotel-react.vercel.app/'],
-    credentials: true
+    credentials: true,
   })
 );
 
 connectPostgres();
 
-cron.schedule('* 17 * * *', async () => {
+cron.schedule('*/59 * * * *', async () => {
   console.log('Running room availability update...');
   await updateRoomAvailability();
 });
