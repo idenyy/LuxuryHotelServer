@@ -29,7 +29,7 @@ app.use(
 
 connectPostgres();
 
-cron.schedule('*/59 * * * *', async () => {
+cron.schedule('* */1 * * *', async () => {
   console.log('Running room availability update...');
   await updateRoomAvailability();
 });
