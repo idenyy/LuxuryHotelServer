@@ -75,35 +75,6 @@ export const checkRoom = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-export const cancelRoom = async (req: Request, res: Response): Promise<any> => {
-  const userId = req.user?.id;
-  const { bookingId } = req.body;
-
-  try {
-    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
-
-    const booking = await Booking.findOne({
-      where: { id: bookingId, userId },
-      include: [
-        {
-          model: Room,
-          as: 'room'
-        }
-      ]
-    });
-
-    if (!booking) return res.status(404).json({ error: 'Booking Not Found' });
-
-    booking.status = 'canceled';
-    await booking.save();
-
-    await booking.room?.update({ isAvailable: true });
-
-    return res.status(200).json({ message: 'Booking canceled successfully', booking });
-  } catch (error: any) {
-    console.error(`Error in [cancelRoom]: ${error.message}`);
-  }
-};
 export const extendRoom = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
   const { bookingId, newCheckOutDate, price } = req.body;
@@ -306,6 +277,41 @@ export const endTable = async (req: Request, res: Response): Promise<any> => {
   } catch (error: any) {
     console.error('Error in [endBooking]:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const cancel = async (req: Request, res: Response): Promise<any> => {
+  const userId = req.user?.id;
+  const { bookingId } = req.body;
+
+  try {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+
+    const booking = await Booking.findOne({
+      where: { id: bookingId, userId },
+      include: [
+        {
+          model: Room,
+          as: 'room'
+        },
+        {
+          model: Table,
+          as: 'table'
+        }
+      ]
+    });
+
+    if (!booking) return res.status(404).json({ error: 'Booking Not Found' });
+
+    booking.status = 'canceled';
+    await booking.save();
+
+    if (booking.room) await booking.room?.update({ isAvailable: true });
+    if (booking.table) await booking.table.update({ isAvailable: true });
+
+    return res.status(200).json({ message: 'Booking canceled successfully', booking });
+  } catch (error: any) {
+    console.error(`Error in [cancelRoom]: ${error.message}`);
   }
 };
 
