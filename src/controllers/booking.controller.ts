@@ -13,14 +13,16 @@ export const checkRoom = async (req: Request, res: Response): Promise<any> => {
     if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
 
     if (!checkInDate || !checkOutDate || !capacity) return res.status(400).json({ error: 'Missing required fields: checkInDate, checkOutDate, or capacity' });
-
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
-
     if (checkIn >= checkOut) return res.status(400).json({ error: 'Check-out date must be later than check-in date' });
 
+    const roomSearchCondition: any = { type, isAvailable: true };
+
+    if (type !== 'meeting') roomSearchCondition.capacity = capacity;
+
     const room = await Room.findOne({
-      where: { type: type, capacity, isAvailable: true },
+      where: roomSearchCondition,
       include: {
         model: Booking,
         as: 'bookings',
