@@ -6,7 +6,7 @@ import { authorization } from '../middleware/authorization.js';
 const router = express.Router();
 
 router.post('/', create);
-router.get('/', getAvailable);
+router.post('/available', getAvailable);
 
 // Review
 router.post('/reviews', authorization, createReview);
