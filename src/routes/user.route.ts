@@ -4,8 +4,8 @@ import { authorization } from '../middleware/authorization.js';
 
 const router = express.Router();
 
-router.get('/:id', authorization, getProfile);
-router.post('/update', authorization, updateProfile);
+router.get('/', authorization, getProfile);
+router.put('/', authorization, updateProfile);
 router.delete('/', authorization, deleteProfile);
 
 router.get('/bookings', authorization, getBookings);

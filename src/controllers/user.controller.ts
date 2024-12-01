@@ -12,7 +12,9 @@ export const getProfile = async (req: Request, res: Response): Promise<any> => {
   try {
     if (!userId) return res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
 
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      attributes: { exclude: ['password'] }
+    });
     if (!user) return res.status(404).json({ message: 'User Not Found' });
 
     return res.status(200).json(user);
@@ -24,7 +26,7 @@ export const getProfile = async (req: Request, res: Response): Promise<any> => {
 
 export const updateProfile = async (req: Request, res: Response): Promise<any> => {
   const userId = req.user?.id;
-  const { fullName, email, currentPassword, newPassword } = req.body;
+  const { name, email, currentPassword, newPassword } = req.body;
 
   try {
     let user: IUser | null = await User.findByPk(userId);
@@ -56,7 +58,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<any> =
       user.password = await bcrypt.hash(newPassword, salt);
     }
 
-    if (fullName) updatedFields.fullName = fullName;
+    if (name) updatedFields.name = name;
     if (email) updatedFields.email = email;
 
     await User.update(updatedFields, { where: { id: userId } });
