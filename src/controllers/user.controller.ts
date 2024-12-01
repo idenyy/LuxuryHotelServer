@@ -32,25 +32,31 @@ export const updateProfile = async (req: Request, res: Response): Promise<any> =
     let user: IUser | null = await User.findByPk(userId);
     if (!user) return res.status(404).json({ message: 'User Not Found' });
 
+    const existingEmail = await User.findOne({ where: { email: email } });
+    if (existingEmail) return res.status(409).json({ error: 'Email is already in use' });
+
     let updatedFields: Partial<IUser> = {};
 
-    if ((!newPassword && currentPassword) || (!currentPassword && newPassword))
-      return res.status(400).json({
-        error: 'Please provide both [current password] and [new password]'
-      });
+    if (email) {
+      if (!currentPassword) return res.status(400).json({ error: 'Current password is required to update email' });
 
-    if (currentPassword && newPassword) {
       const isMatch = await bcrypt.compare(currentPassword, user.password as string);
-      if (!isMatch)
-        return res.status(400).json({
-          error: 'Current password is incorrect'
-        });
+      if (!isMatch) return res.status(400).json({ error: 'Current password is incorrect' });
+
+      updatedFields.email = email;
+    }
+
+    if (newPassword) {
+      if (!currentPassword) return res.status(400).json({ error: 'Current password is required to update password' });
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password as string);
+      if (!isMatch) return res.status(400).json({ error: 'Current password is incorrect' });
 
       if (newPassword.length < 8) {
         return res.status(400).json({ error: 'Password must be at least 8 characters' });
       } else if (newPassword === currentPassword) {
         return res.status(400).json({
-          error: 'New password cannot be the same as the current password.'
+          error: 'New password cannot be the same as the current password'
         });
       }
 
@@ -59,7 +65,6 @@ export const updateProfile = async (req: Request, res: Response): Promise<any> =
     }
 
     if (name) updatedFields.name = name;
-    if (email) updatedFields.email = email;
 
     await User.update(updatedFields, { where: { id: userId } });
 
