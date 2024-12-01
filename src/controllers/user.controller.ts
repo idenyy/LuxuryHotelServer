@@ -55,7 +55,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<any> =
       }
 
       const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(newPassword, salt);
+      updatedFields.password = await bcrypt.hash(newPassword, salt);
     }
 
     if (name) updatedFields.name = name;
