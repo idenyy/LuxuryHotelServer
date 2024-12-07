@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -20,11 +20,21 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com', 'https://luxury-hotel-react.vercel.app'],
-  })
-);
+// @ts-ignore
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const allowedOrigins = ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com', 'https://luxury-hotel-react.vercel.app'];
+  const origin = req.headers.origin as string;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 connectPostgres();
 
