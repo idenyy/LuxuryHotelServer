@@ -20,9 +20,10 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+app.options('*', cors());
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com/', 'https://luxury-hotel-react.vercel.app'],
+    origin: ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com', 'https://luxury-hotel-react.vercel.app'],
     credentials: true,
   })
 );
