@@ -20,20 +20,10 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const allowedOrigins = ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com', 'https://luxury-hotel-react.vercel.app'];
-
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, origin);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: ['http://localhost:3000', 'https://luxury-hotel-60c7b53289ed.herokuapp.com', 'https://luxury-hotel-react.vercel.app'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
